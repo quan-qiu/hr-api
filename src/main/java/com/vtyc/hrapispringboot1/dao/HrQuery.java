@@ -25,14 +25,14 @@ public class HrQuery {
                 "employee_id, employee_name " +
                 "FROM V_HRTOCB " +
                 "WHERE " +
-                "(team_leader_day_shift_id LIKE ? OR team_leader_night_shift_id LIKE ?) AND " +
+                "(team_leader_day_shift_id LIKE ? OR team_leader_mid_shift_id LIKE ? OR team_leader_night_shift_id LIKE ?) AND " +
                 "work_center = ? AND " +
                 "management_level= ? AND " +
                 "job_position= ? "
                 ;
 
         SqlRowSet workersList = jdbcPrimaryTemplate.queryForRowSet(sql,
-                new Object[] {tm_user_id,tm_user_id,work_center,"Direct","Worker"}
+                new Object[] {tm_user_id,tm_user_id,tm_user_id,work_center,"Direct","Worker"}
         );
 
         return workersList;
@@ -41,67 +41,36 @@ public class HrQuery {
     public SqlRowSet getMyWorkersListFromWC(String tm_user_id, String work_center, String cn_shift_name, String plant_location) {
 
         String sql = "SELECT " +
-                "employee_id, employee_name " +
+                "employee_id, employee_name, shift " +
                 "FROM V_HRTOCB " +
                 "WHERE " +
-                "(team_leader_day_shift_id LIKE ? OR team_leader_night_shift_id LIKE ?) AND " +
+                "(team_leader_day_shift_id LIKE ? OR team_leader_mid_shift_id LIKE ? OR team_leader_night_shift_id LIKE ?) AND " +
                 "work_center = ? AND " +
                 "management_level= ? AND " +
                 "job_position= ? AND " +
                 "plant_location=?";
 
         SqlRowSet workersList = jdbcPrimaryTemplate.queryForRowSet(sql,
-                new Object[] {tm_user_id,tm_user_id,work_center,"Direct","Worker", plant_location}
+                new Object[] {tm_user_id,tm_user_id,tm_user_id,work_center,"Direct","Worker", plant_location}
         );
 
         return workersList;
     }
 
-    public SqlRowSet getMyWorkCenterList(String tm_user_id,String cn_shift_name) {
-        /*String sql = "SELECT " +
-                "work_center " +
-                "FROM V_HRTOCB " +
-                "WHERE " +
-                "work_center is not null and work_center<>'' and (team_leader_day_shift_id LIKE ? OR team_leader_night_shift_id LIKE ?) AND " +
-                "management_level LIKE ? AND " +
-                "job_position LIKE ? AND " +
-                "plant_location LIKE ? AND " +
-                "shift LIKE ? " +
-                "GROUP BY work_center";
 
-        SqlRowSet workersList = jdbcPrimaryTemplate.queryForRowSet(sql,
-                new Object[] {tm_user_id,tm_user_id,"Direct","Worker","CZ",cn_shift_name}
-        );*/
-
+    public SqlRowSet getMyWorkCenterList(String tm_user_id, String plant_location) {
         String sql = "SELECT " +
-                "work_center " +
+                "distinct(work_center),shift,plant_location " +
                 "FROM V_HRTOCB " +
                 "WHERE " +
-                "work_center is not null and work_center<>'' and (team_leader_day_shift_id LIKE ? OR team_leader_night_shift_id LIKE ?) AND " +
+                "work_center is not null and work_center<>'' and (team_leader_day_shift_id LIKE ? OR team_leader_mid_shift_id LIKE ? OR team_leader_night_shift_id LIKE ?) AND " +
                 "management_level LIKE ? AND " +
                 "job_position LIKE ? AND " +
                 "plant_location LIKE ? " +
-                "GROUP BY work_center";
+                "GROUP BY work_center, shift, plant_location,cost_center";
 
         SqlRowSet workersList = jdbcPrimaryTemplate.queryForRowSet(sql,
-                new Object[] {tm_user_id,tm_user_id,"Direct","Worker","CZ"}
-        );
-        return workersList;
-    }
-
-    public SqlRowSet getMyWorkCenterList(String tm_user_id,String cn_shift_name, String plant_location) {
-        String sql = "SELECT " +
-                "work_center " +
-                "FROM V_HRTOCB " +
-                "WHERE " +
-                "work_center is not null and work_center<>'' and (team_leader_day_shift_id LIKE ? OR team_leader_night_shift_id LIKE ?) AND " +
-                "management_level LIKE ? AND " +
-                "job_position LIKE ? AND " +
-                "plant_location LIKE ? " +
-                "GROUP BY work_center";
-
-        SqlRowSet workersList = jdbcPrimaryTemplate.queryForRowSet(sql,
-                new Object[] {tm_user_id,tm_user_id,"Direct","Worker",plant_location}
+                new Object[] {tm_user_id,tm_user_id,tm_user_id,"Direct","Worker",plant_location}
         );
         return workersList;
     }
@@ -213,16 +182,16 @@ public class HrQuery {
 
     public SqlRowSet getEmployeeIdNotBelongTL(String tl_id){
         String sql = "SELECT employee_id,employee_name,team_leader_day_shift_id," +
-                "team_leader_day_shift_name,team_leader_night_shift_id," +
+                "team_leader_day_shift_name,team_leader_mid_shift_id, team_leader_mid_shift_name,team_leader_night_shift_id," +
                 "team_leader_night_shift_name FROM V_HRTOCB AS v1" +
                 " WHERE LOWER(v1.management_level)='direct'" +
                 " and v1.plant_location in (select plant_location from V_HRTOCB where employee_id=?)" +
                 " and v1.employee_id NOT IN" +
                 " (select v2.employee_id FROM V_HRTOCB AS v2" +
-                " WHERE v2.team_leader_day_shift_id=? OR v2.team_leader_night_shift_id=?)";
+                " WHERE v2.team_leader_day_shift_id=? OR v2.team_leader_mid_shift_id=? OR v2.team_leader_night_shift_id=?)";
 
         SqlRowSet employeeIdNotBelongTL = jdbcPrimaryTemplate.queryForRowSet(sql,
-                new Object[] {tl_id,tl_id,tl_id}
+                new Object[] {tl_id,tl_id,tl_id,tl_id}
         );
 
         return employeeIdNotBelongTL;
@@ -230,7 +199,7 @@ public class HrQuery {
 
     public SqlRowSet getAllEmployeeIds(String tl_id){
         String sql = "SELECT employee_id,employee_name,team_leader_day_shift_id," +
-                "team_leader_day_shift_name,team_leader_night_shift_id," +
+                "team_leader_day_shift_name,team_leader_mid_shift_id, team_leader_mid_shift_name, team_leader_night_shift_id," +
                 "team_leader_night_shift_name FROM V_HRTOCB AS v1" +
                 " WHERE LOWER(v1.management_level)='direct'" +
                 " and v1.plant_location in (select plant_location from V_HRTOCB where employee_id=?)";
@@ -260,7 +229,7 @@ public class HrQuery {
         String sql = "SELECT employee_id,employee_name,plant_location" +
                 ",cost_center,work_center,management_level,job_position" +
                 ",job_position_detail,team_leader_day_shift_id" +
-                ",team_leader_day_shift_name,team_leader_night_shift_id" +
+                ",team_leader_day_shift_name,team_leader_mid_shift_id, team_leader_mid_shift_name, team_leader_night_shift_id" +
                 ",team_leader_night_shift_name,shift,workstatus " +
                 "FROM V_HRTOCB " +
                 "WHERE employee_id=?";
@@ -313,6 +282,13 @@ public class HrQuery {
                 "and (team_leader_day_shift_id is not null and team_leader_day_shift_id<>'') " +
                 "union " +
                 "select " +
+                "distinct(case when team_leader_mid_shift_id<>'' and team_leader_mid_shift_id is not null then team_leader_mid_shift_id end) tl_id," +
+                "team_leader_mid_shift_name tl_name " +
+                "from V_HRTOCB " +
+                "where cost_center=? and plant_location=? and " +
+                "(team_leader_mid_shift_id is not null and team_leader_mid_shift_id<>'')"+
+                "union " +
+                "select " +
                 "distinct(case when team_leader_night_shift_id<>'' and team_leader_night_shift_id is not null then team_leader_night_shift_id end) tl_id," +
                 "team_leader_night_shift_name tl_name " +
                 "from V_HRTOCB " +
@@ -321,7 +297,7 @@ public class HrQuery {
 
 
         SqlRowSet teamLeaders = jdbcPrimaryTemplate.queryForRowSet(sql,
-                new Object[] {cost_center, plant_location,cost_center, plant_location }
+                new Object[] {cost_center, plant_location,cost_center, plant_location,cost_center, plant_location }
         );
 
         return teamLeaders;
@@ -337,6 +313,15 @@ public class HrQuery {
                     "from V_HRTOCB " +
                     "where cost_center=? and plant_location=? " +
                     "and (team_leader_day_shift_id is not null and team_leader_day_shift_id<>'') ";
+        }
+
+        if (shift_type.toLowerCase().equals("mid")){
+            sql = "select " +
+                    "distinct(case when team_leader_mid_shift_id<>'' and team_leader_mid_shift_id is not null then team_leader_mid_shift_id end) tl_id, " +
+                    "team_leader_mid_shift_name tl_name " +
+                    "from V_HRTOCB " +
+                    "where cost_center=? and plant_location=? " +
+                    "and (team_leader_mid_shift_id is not null and team_leader_mid_shift_id<>'') ";
         }
 
         if (shift_type.toLowerCase().equals("night")){

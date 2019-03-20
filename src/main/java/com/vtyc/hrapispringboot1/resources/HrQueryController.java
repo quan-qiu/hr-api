@@ -98,41 +98,15 @@ public class HrQueryController {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-    @Path("/getMyWorkCenterList/{tm_user_id}/{cn_shift_name}")
+    @Path("/getMyWorkCenterList/{tm_user_id}/{plant_location}")
     public String getMyWorkCenterList(@PathParam("tm_user_id") String tm_user_id,
-                                      @PathParam("cn_shift_name") String cn_shift_name) {
-        JSONObject result = new JSONObject();
-        JSONArray data = new JSONArray();
-        String status = "false";
-        String msg = "Not found";
-
-        SqlRowSet workCenterList = hrQuery.getMyWorkCenterList(tm_user_id, cn_shift_name);
-
-        if (workCenterList != null){
-            data = Utility.convertResultSetToJson(workCenterList);
-            status = "true";
-            msg = "Data fetched successfully";
-        }
-
-        result.put("data", data);
-        result.put("status",status);
-        result.put("msg", msg);
-        return result.toJSONString();
-
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-    @Path("/getMyWorkCenterList/{tm_user_id}/{cn_shift_name}/{plant_location}")
-    public String getMyWorkCenterList(@PathParam("tm_user_id") String tm_user_id,
-                                      @PathParam("cn_shift_name") String cn_shift_name,
                                       @PathParam("plant_location") String plant_location) {
         JSONObject result = new JSONObject();
         JSONArray data = new JSONArray();
         String status = "false";
         String msg = "Not found";
 
-        SqlRowSet workCenterList = hrQuery.getMyWorkCenterList(tm_user_id, cn_shift_name,plant_location);
+        SqlRowSet workCenterList = hrQuery.getMyWorkCenterList(tm_user_id, plant_location);
 
         if (workCenterList != null){
             data = Utility.convertResultSetToJson(workCenterList);
