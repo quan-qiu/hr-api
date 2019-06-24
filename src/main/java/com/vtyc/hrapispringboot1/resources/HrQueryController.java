@@ -669,8 +669,7 @@ public class HrQueryController {
     @GET
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     @Path("/getAllDepartment/{plant_location}")
-    public String getAllDepartment(@PathParam("plant_location") String plant_location
-    ){
+    public String getAllDepartment(@PathParam("plant_location") String plant_location){
         JSONObject result = new JSONObject();
         JSONArray data = new JSONArray();
         String status = "false";
@@ -682,6 +681,30 @@ public class HrQueryController {
 
         if (departments != null ){
             data = Utility.convertResultSetToJson(departments);
+            status = "true";
+            msg = "Data fetched successfully";
+        }
+
+        result.put("status", status);
+        result.put("msg", msg);
+        result.put("data", data);
+
+        return result.toJSONString();
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+    @Path("/getShift/{plant_location}")
+    public String getShift(@PathParam("plant_location") String plant_location ){
+        JSONObject result = new JSONObject();
+        JSONArray data = new JSONArray();
+        String status = "false";
+        String msg = "Not found";
+
+        SqlRowSet shifts = hrQuery.getShift(plant_location);
+
+        if (shifts != null ){
+            data = Utility.convertResultSetToJson(shifts);
             status = "true";
             msg = "Data fetched successfully";
         }

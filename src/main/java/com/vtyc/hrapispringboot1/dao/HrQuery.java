@@ -377,4 +377,16 @@ public class HrQuery {
 
         return departments;
     }
+
+    public SqlRowSet getShift(String plant_location){
+        String sql = "select distinct shift from V_HRTOCB " +
+                "where upper(management_level)='DIRECT' and upper(plant_location)=?; ";
+
+
+        SqlRowSet shifts = jdbcPrimaryTemplate.queryForRowSet(sql,
+                new Object[] {plant_location }
+        );
+
+        return shifts;
+    }
 }
